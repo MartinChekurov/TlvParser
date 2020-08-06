@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include "QDebug"
+#include "qtreewidget.h"
 
 TlvWindow::TlvWindow(QWidget* parent)
 	: QWidget{parent},
@@ -39,20 +40,12 @@ unsigned char HexChar (char c)
 	return 0xFF;
 }
 
-void TlvWindow::parse() {
-	std::string field = tlvField.text().toStdString();
-	unsigned int size = field.length();
-	unsigned char* data = new unsigned char[size/2]{};
+void TlvWindow::parseRecursive(const unsigned char* data, unsigned int size, QTreeWidgetItem* parent) {
 	unsigned int i = 0;
-	for (int bytes = 0, ascii = 0 ; bytes < size && ascii < size ; bytes++, ascii++) {
-		data[bytes] = HexChar(field[ascii]);
-		data[bytes] <<= 4;
-		data[bytes] |= HexChar(field[++ascii]);
-		data[bytes] &= 0xFF;
-	}
-	while(i < size/2) {
+	unsigned int initialPos = 0;
+	while(i < size) {
 		unsigned long long tag = 0;
-		tag = data[i++];
+		initialPos = i;
 		if ((data[i] & 0x1F) == 0x1F) {
 			do {
 				if (i < size) {
@@ -60,6 +53,10 @@ void TlvWindow::parse() {
 					tag |= data[i++];
 				}
 			} while (data[i] & 0x80);
+			tag <<= 8;
+			tag |= data[i++];
+		} else {
+			tag = data[i++];
 		}
 		printf("\ntag: %X", tag);
 		unsigned long long length = 0;
@@ -72,10 +69,28 @@ void TlvWindow::parse() {
 				length |= data[i];
 			}	
 		}
+		
+		if (tag & 0x20) {
+			parseRecursive(data + length, size - (i - initialPos), parent);
+		}
 		i += length;	
 		printf("\nlength: %X", length);
 	}
+}
+void TlvWindow::parse() {
+	std::string field = tlvField.text().toStdString();
+	unsigned int size = field.length();
+	unsigned char* data = new unsigned char[size/2]{};
+	for (int bytes = 0, ascii = 0 ; bytes < size && ascii < size ; bytes++, ascii++) {
+		data[bytes] = HexChar(field[ascii]);
+		data[bytes] <<= 4;
+		data[bytes] |= HexChar(field[++ascii]);
+		data[bytes] &= 0xFF;
+	}
 	tlvTree.clear();
+	QTreeWidgetItem* item = new QTreeWidgetItem(&tlvTree);
+	item->setText(0, "TLV data");
+	parseRecursive(data, size/2, item);
 }
 
 void TlvWindow::addRoot(const QString& text) {

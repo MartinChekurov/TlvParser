@@ -19,6 +19,7 @@ public:
 
 	void addRoot(const QString& text);
 	void addChild(QTreeWidgetItem* parent, const QString& text);
+	void parseRecursive(const unsigned char* data, unsigned int size, QTreeWidgetItem* parent);
 
 private slots:
 	void parse();
