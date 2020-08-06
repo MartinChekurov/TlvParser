@@ -1,4 +1,4 @@
 .clangd
 .git
 Build
-compile_conmmands.json
+compile_commands.json
