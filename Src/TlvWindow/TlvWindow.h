@@ -5,9 +5,6 @@
 #include "QLineEdit"
 #include "QPushButton"
 #include "QTreeWidget"
-#include "qnamespace.h"
-#include "qobjectdefs.h"
-#include "qtreewidget.h"
 
 class TlvWindow : public QWidget {
 
@@ -17,9 +14,11 @@ public:
 	TlvWindow(QWidget* parent = nullptr);
 	~TlvWindow();
 
-	void addRoot(const QString& text);
-	void addChild(QTreeWidgetItem* parent, const QString& text);
-	void parseRecursive(const unsigned char* data, unsigned int size, QTreeWidgetItem* parent);
+	QTreeWidgetItem* addRoot(const QString& text);
+	QTreeWidgetItem* addChild(QTreeWidgetItem* parent, const QString& text);
+	unsigned char hexChar(char c);
+	unsigned char getIndex(const QString& str, unsigned int index);
+	int parseRecursive(const QString& data, QTreeWidgetItem* parent);
 
 private slots:
 	void parse();

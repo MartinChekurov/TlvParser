@@ -105,9 +105,12 @@ INC = -IC:/Qt/5.15.0/mingw81_32/include\
 	-ISrc/TlvWindow
 
 ### LINKER FLAGS ###
-LDFLAGS = -LC:/Qt/5.15.0/mingw81_32/lib
+LDFLAGS = -static -LC:/Qt/5.15.0/mingw81_32/lib
 
-LDLIBS = -lQt5Quick  -lQt5PrintSupport -lQt5Qml -lQt5Network -lQt5Widgets -lQt5Gui -lQt5Core
+LDLIBS = C:/Qt/5.15.0/mingw81_32/lib/libQt5Widgets.a\
+         C:/Qt/5.15.0/mingw81_32/lib/libQt5Gui.a\
+         C:/Qt/5.15.0/mingw81_32/lib/libQt5Core.a\
+		 -static-libgcc -static-libstdc++
 		  
 ### COMPILER FLAGS
 CFLAGS = $(INC)
@@ -122,7 +125,7 @@ all: $(BUILD)/test.exe
 
 $(BUILD)/test.exe: $(OBJ)
 	@echo LINKING $^
-	@$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 	
 $(BUILD)/%.o: %.cpp
 	@echo COMPILING $<
