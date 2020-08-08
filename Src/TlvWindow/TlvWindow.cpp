@@ -2,31 +2,42 @@
 #include "QVBoxLayout"
 #include "QTreeWidgetItem"
 #include "QHeaderView"
+#include <iostream>
+#include <stdio.h>
 
 TlvWindow::TlvWindow(QWidget* parent)
 	: QWidget{parent},
 	  tlvField{},
 	  tlvParseBtn{},
 	  tlvTree{} {
+
 	connect(&tlvParseBtn, SIGNAL(clicked()), this, SLOT(parse()));
+
 	tlvField.setMinimumWidth(500);
+	tlvField.setPlaceholderText("C20401020304.. no spaces");
+
 	tlvParseBtn.setText("Parse");
-	QHBoxLayout* h = new QHBoxLayout();
-	if (h) {
-		h->addWidget(&tlvField);
-		h->addWidget(&tlvParseBtn);
+
+	QHeaderView* header = tlvTree.header();
+	if (header) {
+		header->setSectionResizeMode(QHeaderView::ResizeToContents);
+		header->setStretchLastSection(false);
 	}
-	tlvTree.setColumnCount(1);
-	tlvTree.header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-	tlvTree.header()->setStretchLastSection(false);
 	tlvTree.setHeaderHidden(true);
 	tlvTree.setMinimumHeight(500);
+	tlvTree.setColumnCount(1);
+
 	QVBoxLayout* v = new QVBoxLayout();
 	if (v) {
-		v->addLayout(h);
+		QHBoxLayout* h = new QHBoxLayout();
+		if (h) {
+			h->addWidget(&tlvField);
+			h->addWidget(&tlvParseBtn);
+			v->addLayout(h);
+		}
 		v->addWidget(&tlvTree);
+		setLayout(v);
 	}
-	setLayout(v);
 	setWindowTitle("TLV Parser");
 }
 
@@ -58,14 +69,15 @@ unsigned char TlvWindow::getIndex(const QString& str, unsigned int index) {
 }
 
 int TlvWindow::parseRecursive(const QString& data, QTreeWidgetItem* parent) {
-	unsigned int i{}, initialPos{}, length{}, tag{}, size = data.length();
+	unsigned int i{}, initialPos{}, length{}, tag{}, size = data.length(), lengthFirstByte{}, tagBytes{};
 	if (!size) {
 		return 1;
 	}
+	char buf[100]{};
 	while(i < size/2) {
 		tag = 0;
 		length = 0;
-		initialPos = i;
+		tagBytes = 0;
 		if ((getIndex(data, i) & 0x1F) == 0x1F) {
 			do {
 				if (i >= size) {
@@ -74,24 +86,30 @@ int TlvWindow::parseRecursive(const QString& data, QTreeWidgetItem* parent) {
 				tag <<= 8;
 				tag |= getIndex(data, i);
 				i++;
+				tagBytes++;
 			} while (getIndex(data, i) & 0x80);
 			if (i >= size) {
 				return 1;
 			}
 			tag |= getIndex(data, i);
 			i++;
+			tagBytes++;
 		} else {
 			tag = getIndex(data ,i);
 			i++;
+			tagBytes++;
 		}
 		if (i >= size) {
 			return 1;
 		}
 		if (!(getIndex(data, i) & 0x80)) {
 			length = getIndex(data, i) & 0x7F;
+			lengthFirstByte = 0;
+			snprintf(buf, sizeof(buf), "%0*X %02X", tagBytes, tag, length);
 			i++;
 		} else {
 			unsigned int bytes = getIndex(data, i) & 0x7F;
+			lengthFirstByte = getIndex(data, i);
 			i++;
 			for (unsigned int count = 0 ; count < bytes ; count++, i++) {
 				if (i >= size) {
@@ -100,25 +118,29 @@ int TlvWindow::parseRecursive(const QString& data, QTreeWidgetItem* parent) {
 				length <<= 8;
 				length |= getIndex(data, i);
 			}	
+			snprintf(buf, sizeof(buf), "%0*X %02X%0*X", tagBytes, tag, lengthFirstByte, bytes*2, length);
 		}
+		QString str(buf);
 		if (tag & 0x20) {
 			QTreeWidgetItem* item = nullptr;
 			if (parent) {
-				item = addChild(parent, data.mid(initialPos*2, (i-initialPos)*2));
+				item = addChild(parent, str);
 			} else {
-				item = addRoot(data.mid(initialPos*2, (i-initialPos)*2));
+				item = addRoot(str);
 			}
 			parseRecursive(data.mid(i*2, length*2), item);
 		}
+		initialPos = i;
 		i += length;	
 		if (i > size) {
 			return 1;
 		}
+		str += " " + data.mid(initialPos*2, (i - initialPos)*2);
 		if (!(tag & 0x20)) {
 			if (parent) {
-				addChild(parent, data.mid(initialPos*2, i*2));
+				addChild(parent, str);
 			} else {
-				addRoot(data.mid(initialPos*2, i*2));
+				addRoot(str);
 			}
 		}
 	}
@@ -128,19 +150,29 @@ int TlvWindow::parseRecursive(const QString& data, QTreeWidgetItem* parent) {
 void TlvWindow::parse() {
 	tlvTree.clear();
 	int status = parseRecursive(tlvField.text(), nullptr);
+	if (status) {
+		tlvTree.clear();
+	}
 }
 
 QTreeWidgetItem* TlvWindow::addRoot(const QString& text) {
 	QTreeWidgetItem* item = new QTreeWidgetItem(&tlvTree);
-	item->setText(0, text);
-	item->setExpanded(true);
+	if (item) {
+		item->setText(0, text);
+		item->setExpanded(true);
+	}
 	return item;
 }
 
 QTreeWidgetItem* TlvWindow::addChild(QTreeWidgetItem* parent, const QString& text) {
+	if (!parent) {
+		return nullptr;
+	}
 	QTreeWidgetItem* item = new QTreeWidgetItem(parent);
-	item->setText(0, text);
-	item->setExpanded(true);
-	parent->addChild(item);
+	if (item) {
+		item->setText(0, text);
+		item->setExpanded(true);
+		parent->addChild(item);
+	}
 	return item;
 }

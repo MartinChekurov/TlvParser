@@ -1,6 +1,9 @@
 
 BUILD = Build
 
+### EXECUTABLE ###
+EXE = TlvParser.exe
+
 ### SOURCES ###
 SRC = Src/Main\
 	  Src/TlvWindow/TlvWindow
@@ -121,9 +124,9 @@ CC = g++
 ### QT MOC ###
 MOC = moc
 
-all: $(BUILD)/test.exe
+all: $(BUILD)/$(EXE)
 
-$(BUILD)/test.exe: $(OBJ)
+$(BUILD)/$(EXE): $(OBJ)
 	@echo LINKING $^
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 	
@@ -149,4 +152,4 @@ $(BUILD)/%.moc.cpp: %.h
 
 clean:
 	@echo CLEANING......
-	@rm -rf $(BUILD)/Src $(BUILD)/test.exe
+	@rm -rf $(BUILD)/Src $(BUILD)/$(EXE)
