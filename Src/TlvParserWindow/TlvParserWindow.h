@@ -9,6 +9,7 @@
 #include "QPushButton"
 #include "QLineEdit"
 #include "QTreeWidget"
+#include "TlvInfo.h"
 
 class TlvParserWindow : public QWidget {
 
@@ -24,9 +25,13 @@ private:
     QTreeWidget* parsedField;
 
     void initUi();
+    QString buildTagInfo(TlvInfo* tagInfo);
 
 private slots:
-    void parseTlv();
+    void parse();
+    void enableParseButton(const QString& text);
+    void tagClicked(QTreeWidgetItem *item, int column);
+    void tagDoubleClicked(QTreeWidgetItem *item, int column);
 };
 
 #endif //TEST_TLVPARSERWINDOW_H

@@ -17,7 +17,7 @@ public:
     TlvParser(const QByteArray& data);
     ~TlvParser();
 
-    unsigned int parseToQtTree(QTreeWidget* root, QTreeWidgetItem* child);
+    unsigned int parseToTree(QTreeWidget* tree);
 };
 
 #endif //TEST_TLVPARSER_H

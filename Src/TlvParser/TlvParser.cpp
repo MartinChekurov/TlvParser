@@ -21,6 +21,11 @@ static QTreeWidgetItem* addTlvRoot(QTreeWidget* parent, const QString& text)
     if (item) {
         item->setText(0, text);
         item->setExpanded(true);
+//        QTreeWidgetItem* descriptionItem = new QTreeWidgetItem(item);
+//        descriptionItem->setExpanded(false);
+//        QTreeWidgetItem* subItem = new QTreeWidgetItem(descriptionItem);
+//        subItem->setText(0, "alabala\nasdasd\nasdasd");
+//        subItem->setExpanded(true);
     }
     return item;
 }
@@ -34,7 +39,10 @@ static QTreeWidgetItem* addTlvChild(QTreeWidgetItem* parent, const QString& text
     if (item) {
         item->setText(0, text);
         item->setExpanded(true);
-        parent->addChild(item);
+//        QTreeWidgetItem* subItem = new QTreeWidgetItem(item);
+//        subItem->setText(0, "alabala\naaaa\naaaa");
+//        subItem->setExpanded(true);
+//        parent->addChild(item);
     }
     return item;
 }
@@ -126,7 +134,7 @@ static unsigned int parseToQtTree_(const QByteArray& data, QTreeWidget* root, QT
     return 0;
 }
 
-unsigned int TlvParser::parseToQtTree(QTreeWidget *root, QTreeWidgetItem *child)
+unsigned int TlvParser::parseToTree(QTreeWidget *tree)
 {
-    return parseToQtTree_(this->data, root, child);
+    return parseToQtTree_(this->data, tree, nullptr);
 }

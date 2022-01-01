@@ -19,6 +19,7 @@ SRC := $(wildcard Src/*.cpp)
 SRC += $(wildcard Src/MainWindow/*.cpp)
 SRC += $(wildcard Src/TlvParserWindow/*.cpp)
 SRC += $(wildcard Src/TlvParser/*.cpp)
+SRC += $(wildcard Src/TlvInfo/*.cpp)
 SRC := $(filter-out %.moc.cpp, $(SRC))
 SRC += $(MOCSRC)
 # Include files
@@ -35,8 +36,10 @@ INC += -I/home/marti/Qt/6.2.2/gcc_64/include\
 	   -I/home/marti/Qt/6.2.2/gcc_64/include/QtGui\
 	   -I/home/marti/Qt/6.2.2/gcc_64/include/QtWidgets
 endif
+
 # Object files
 OBJS = $(patsubst %.cpp, $(BUILD)/%.o, $(SRC))
+
 # Dependencies
 DEPS = $(OBJS:%.o=%.d)
 
@@ -47,6 +50,7 @@ CFLAGS = $(INC) -std=c++17 -fPIC
 
 # Linker
 LD = g++
+
 # Linker flags
 LDFLAGS =
 ifeq ($(OS),windows)
@@ -59,6 +63,7 @@ LDFLAGS += -LC:\Qt\6.2.2\mingw_64\lib
 else
 LDFLAGS += -L/home/marti/Qt/6.2.2/gcc_64/lib
 endif
+
 # Libraries
 LIBS =
 # QT Libs

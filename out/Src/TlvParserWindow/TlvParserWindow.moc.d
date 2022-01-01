@@ -138,4 +138,6 @@ out/Src/TlvParserWindow/TlvParserWindow.moc.o: \
  /home/marti/Qt/6.2.2/gcc_64/include/QtWidgets/qtabbar.h \
  /home/marti/Qt/6.2.2/gcc_64/include/QtWidgets/qtabwidget.h \
  /home/marti/Qt/6.2.2/gcc_64/include/QtWidgets/qrubberband.h \
- /home/marti/Qt/6.2.2/gcc_64/include/QtWidgets/qtreewidgetitemiterator.h
+ /home/marti/Qt/6.2.2/gcc_64/include/QtWidgets/qtreewidgetitemiterator.h \
+ Src/TlvInfo/TlvInfo.h /home/marti/Qt/6.2.2/gcc_64/include/QtCore/QString \
+ /home/marti/Qt/6.2.2/gcc_64/include/QtCore/qstring.h
